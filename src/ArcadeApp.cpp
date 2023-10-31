@@ -15,9 +15,15 @@ int main()
 {
 	Vec2D aVec(3, -7);
 
+	Vec2D resultVec = aVec * 3;
+
 	cout << aVec << endl;
 
 	cout << -aVec << endl;
+
+	cout << aVec*3 << endl;
+
+	cout << resultVec << endl;
 
 	return 0;
 }

@@ -26,6 +26,12 @@ public:
 	bool operator==(const Vec2D& vec2) const;
 	bool operator!=(const Vec2D& vec2) const;
 	Vec2D operator-() const;
+	Vec2D operator*(float scale) const;
+	Vec2D operator/(float scale) const;
+	Vec2D& operator*=(float scale);
+	Vec2D& operator/=(float scale);
+
+	friend Vec2D operator*(float scalar, const Vec2D& vec);
 
 private:
 	float mX, mY;
