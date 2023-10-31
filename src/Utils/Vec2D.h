@@ -31,6 +31,14 @@ public:
 	Vec2D& operator*=(float scale);
 	Vec2D& operator/=(float scale);
 
+	Vec2D operator+(const Vec2D& vec) const;
+	Vec2D& operator+=(const Vec2D& vec);
+	Vec2D operator-(const Vec2D& vec) const;
+	Vec2D& operator-=(const Vec2D& vec);
+
+	float Magnitude2() const;
+	float Magnitude() const;
+
 	friend Vec2D operator*(float scalar, const Vec2D& vec);
 
 private:

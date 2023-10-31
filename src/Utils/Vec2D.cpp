@@ -61,3 +61,35 @@ Vec2D& Vec2D::operator/=(float scale)
 	*this = *this / scale;
 	return *this;
 }
+
+Vec2D Vec2D::operator+(const Vec2D& vec) const
+{
+	return Vec2D(mX + vec.mX, mY + vec.mY);
+}
+
+Vec2D& Vec2D::operator+=(const Vec2D& vec)
+{
+	return Vec2D(mX - vec.mX, mY - vec.mY);
+}
+
+Vec2D Vec2D::operator-(const Vec2D& vec) const
+{
+	*this = *this + vec;
+	return *this;
+}
+
+Vec2D& Vec2D::operator-=(const Vec2D& vec)
+{
+	*this = *this - vec;
+	return *this;
+}
+
+float Vec2D::Magnitude2() const
+{
+	return (mX * mX) + (mY * mY);
+}
+
+float Vec2D::Magnitude() const
+{
+	return sqrt(Magnitude2());
+}

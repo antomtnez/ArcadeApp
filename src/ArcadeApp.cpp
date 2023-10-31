@@ -21,7 +21,7 @@ int main()
 
 	cout << -aVec << endl;
 
-	cout << aVec*3 << endl;
+	cout << aVec * 3 << endl;
 
 	cout << resultVec << endl;
 
