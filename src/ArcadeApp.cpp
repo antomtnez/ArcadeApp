@@ -1,193 +1,63 @@
-//============================================================================
-// Name        : ArcadeApp.cpp
-// Author      : antomtnezdev
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
-//============================================================================
-
 #include <iostream>
-#include <cassert>
-#include "Vec2D.h"
+#include <SDL2/SDL.h>
+#include <thread>
+#include <chrono>
+
+#include "Color.h"
+#include "Screen.h"
+#include "Line2D.h"
+#include "Star2D.h"
+#include "Square2D.h"
+#include "ChessBoard.h"
 
 using namespace std;
 
-class DynamicIntArray
+const int SCREEN_HEIGHT = 288;
+const int SCREEN_WIDTH = 224;
+const int MAGNIFICATION = 3;
+
+int main(int argv, char** args)
 {
-public:
-	DynamicIntArray():moptrData(nullptr), mSize(0), mCapacity(0){}
-	DynamicIntArray(const DynamicIntArray& otherArray);
-	DynamicIntArray& operator=(const DynamicIntArray& otherArray);
-	//should clean up the memory
-	~DynamicIntArray();
+	Screen theScreen;
 
-	inline size_t Size() const { return mSize; }
-	inline size_t Capacity() const { return mCapacity; }
+	theScreen.Init(SCREEN_WIDTH, SCREEN_HEIGHT, MAGNIFICATION);
 
-	//Allocates the dynamic array
-	bool Init(size_t capacity = INITIAL_CAPACITY);
-	bool Reserve(size_t capacity);
-	bool Resize(size_t newSize);
-	bool PushBack(int newVal);
-	bool PopBack(int& value);
+	Vec2D centerPoint(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
+	Vec2D endPoint(SCREEN_WIDTH/2, 0);
 
-	const int& operator[](size_t index) const;
-	int& operator[](size_t index);
+	/*
+	Line2D line = {centerPoint, endPoint};
+	Star2D star(line, 15);
 
-private:
-	int* moptrData;
-	size_t mSize, mCapacity;
+	Square2D square(50, centerPoint);
+	Square2D square2(100, centerPoint);
 
-	static const size_t INITIAL_CAPACITY = 10;
-	static const size_t RESIZE_MULTIPLIER = 2;
-};
+	theScreen.Draw(square2, Color::Green(), 6.28 / 2);
+	theScreen.Draw(star, Color::Yellow());
+	theScreen.Draw(square, Color::Pink());
+	*/
 
-DynamicIntArray::DynamicIntArray(const DynamicIntArray& otherArray)
-{
-	bool result = Init(otherArray.mCapacity);
-	assert(result);
+	ChessBoard theChessBoard(24);
 
-	mSize = otherArray.mSize;
+	theScreen.DrawChessTable(theChessBoard, Vec2D(0, 0));
 
-	for(size_t i=0; i < mSize; i++)
+	theScreen.SwapScreens();
+
+	SDL_Event sdlEvent;
+	bool running = true;
+
+	while(running)
 	{
-		moptrData[i] = otherArray.moptrData[i];
-	}
-}
-
-DynamicIntArray& DynamicIntArray::operator=(const DynamicIntArray& otherArray)
-{
-	if(this == &otherArray) return *this;
-
-	if(moptrData != nullptr) delete [] moptrData;
-
-	bool result = Init(otherArray.mCapacity);
-	assert(result);
-
-	mSize = otherArray.mSize;
-
-	for(size_t i=0; i < mSize; i++)
-	{
-		moptrData[i] = otherArray.moptrData[i];
-	}
-}
-
-DynamicIntArray::~DynamicIntArray()
-{
-	delete [] moptrData;
-	moptrData = nullptr;
-}
-
-bool DynamicIntArray::Init(size_t capacity)
-{
-	if(capacity == 0) return false;
-	if(mCapacity == capacity) return true;
-
-	if(moptrData)
-	{
-		delete [] moptrData;
-		moptrData = nullptr;
-		mSize = 0;
-		mCapacity = 0;
-	}
-
-	moptrData = new (nothrow) int[capacity];
-	if(!moptrData) return false;
-	mSize = 0;
-	mCapacity = capacity;
-	return true;
-}
-
-bool DynamicIntArray::Reserve(size_t capacity)
-{
-	if(mCapacity < capacity)
-	{
-		//do the re-allocation
-		int* oldData = moptrData;
-
-		moptrData = new (nothrow) int[capacity];
-		if(!moptrData)
+		while(SDL_PollEvent(&sdlEvent))
 		{
-			moptrData = oldData;
-			return false;
+			switch(sdlEvent.type)
+			{
+			case SDL_QUIT:
+				running = false;
+				break;
+			}
 		}
-
-		mCapacity = capacity;
-
-		for(size_t i=0; i < mSize; i++)
-		{
-			moptrData[i] = oldData[i];
-		}
-
-		delete [] oldData;
 	}
-
-	return true;
-}
-
-bool DynamicIntArray::Resize(size_t newSize)
-{
-	if(mCapacity < newSize)
-	{
-		//need to reallocate
-		bool reserveSucceeded = Reserve(newSize);
-		if(!reserveSucceeded) return reserveSucceeded;
-	}
-
-	for(size_t i=0; i < mSize; i++)
-	{
-		moptrData[i] = 0;
-	}
-
-	mSize = newSize;
-	return true;
-}
-
-bool DynamicIntArray::PushBack(int newVal)
-{
-	assert(moptrData && "Has not been initialized - call Init()");
-	if(!moptrData) return false;
-
-	if(mSize + 1 > mCapacity)
-	{
-		bool reserveResult = Reserve(mCapacity * RESIZE_MULTIPLIER);
-		if(!reserveResult) return false;
-	}
-
-	moptrData[mSize++] = newVal;
-	return true;
-}
-
-bool DynamicIntArray::PopBack(int& value)
-{
-	assert(moptrData && "Has not been initialized - call Init()");
-	if(!moptrData) return false;
-
-	if(mSize > 0)
-	{
-		value = moptrData[mSize--];
-		return true;
-	}
-
-	return false;
-}
-
-const int& DynamicIntArray::operator [](size_t index) const
-{
-	assert(moptrData && index < mSize);
-	return moptrData[index];
-}
-
-int& DynamicIntArray::operator [](size_t index)
-{
-	assert(moptrData && index < mSize);
-	return moptrData[index];
-}
-
-int main()
-{
-	DynamicIntArray* intArray = new DynamicIntArray;
-	delete intArray;
 
 	return 0;
 }
