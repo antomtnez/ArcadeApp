@@ -4,11 +4,15 @@
 #include <stdint.h>
 #include "ScreenBuffer.h"
 #include "Color.h"
+#include <vector>
 
 class Vec2D;
 class Line2D;
 class Star2D;
 class Square2D;
+class Triangle;
+class AARectangle;
+class Circle;
 class ChessBoard;
 struct SDL_Window;
 struct SDL_Surface;
@@ -32,10 +36,9 @@ public:
     void Draw(const Vec2D& point, const Color& color);
     void Draw(const Line2D& line, const Color& color);
     void Draw(const Star2D& star, const Color& color);
-    void Draw(const Square2D& square, const Color& color);
-    void Draw(const Square2D& square, const Color& color, const int& angleRotation);
-
-    void DrawChessTable(const ChessBoard& chessboard, const Vec2D& startPoint);
+    void Draw(const Triangle& triangle, const Color& color, bool fill = false, const Color& fillColor = Color::White());
+    void Draw(const AARectangle& rectangle, const Color& color, bool fill = false, const Color& fillColor = Color::White());
+    void Draw(const Circle& circle, const Color& color, bool fill = false, const Color& fillColor = Color::White());
 
 private:
 
@@ -43,6 +46,7 @@ private:
     Screen& operator=(const Screen& screen);
 
     void ClearScreen();
+    void FillPoly(const std::vector<Vec2D>& points, const Color& color);
 
     uint32_t mWidth, mHeight;
 

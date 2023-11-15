@@ -3,8 +3,7 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
-                "C:\\SDL2\\x86_64-w64-mingw32\\include"
+                "${workspaceFolder}\\**"
             ],
             "defines": [
                 "_DEBUG",
@@ -12,8 +11,8 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.22000.0",
-            "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
-            "cStandard": "c17",
+            "compilerPath": "C:/mingw64/bin/g++.exe",
+            "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64"
         }

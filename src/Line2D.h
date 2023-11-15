@@ -12,6 +12,8 @@ public:
 
     inline const Vec2D& GetP0() const { return mP0; }
     inline const Vec2D& GetP1() const { return mP1; }
+    inline const void SetP0(Vec2D& point) { mP0 = point; }
+    inline const void SetP1(Vec2D& point) { mP1 = point; }
 
     bool operator==(const Line2D& line) const;
     float MinDistanceFrom(const Vec2D& p, bool limitToSegment /*= false*/) const;

@@ -104,3 +104,20 @@
         SDL_GetRGBA(mColor, mFormat, &r, &g, &b, &a);
         return a;
     }
+
+    Color Color::Evaluate1MinueSourceAlpha(const Color& source, const Color& destination)
+    {
+        uint8_t alpha = source.GetAlpha();
+
+        float sourceAlpha = float(alpha) / 255.0f;
+        double destinationAlpha = 1.0f - sourceAlpha;
+
+        Color outColor;
+
+        outColor.SetAlpha(255);
+        outColor.SetRed(float(source.GetRed()) * sourceAlpha + destination.GetRed() * destinationAlpha);
+        outColor.SetGreen(float(source.GetGreen()) * sourceAlpha + destination.GetGreen() * destinationAlpha);
+        outColor.SetBlue(float(source.GetBlue()) * sourceAlpha + destination.GetBlue() * destinationAlpha);
+
+        return outColor;
+    }

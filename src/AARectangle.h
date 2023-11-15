@@ -7,7 +7,7 @@ class AARectangle: public Shape
 {
 public:
     AARectangle();
-    AARectangle(const Vec2D& topLeft, unsigned int& width, unsigned int& height);
+    AARectangle(const Vec2D& topLeft, unsigned int width, unsigned int height);
     AARectangle(const Vec2D& topLeft, const Vec2D& bottomRight);
 
     inline void SetTopLeftPoint(const Vec2D& topLeft) { mPoints[0] = topLeft; }
@@ -19,7 +19,7 @@ public:
     float GetWidth() const;
     float GetHeight() const;
 
-    void MoveTo(const Vec2D& position);
+    virtual void MoveTo(const Vec2D& position) override;
     virtual Vec2D GetCenterPoint() const override;
 
     bool Intersects(const AARectangle& otherRect) const;

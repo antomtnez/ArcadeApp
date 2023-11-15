@@ -3,18 +3,26 @@
 
 #include "Vec2D.h"
 #include "Line2D.h"
+#include <vector>
 
 class Star2D
 {
 public:
 	Star2D();
-	Star2D(const Line2D& firstLine, int count);
+	Star2D(const Vec2D& centerPoint, int size, int count);
 
-	inline Line2D GetStartLine() const { return startLine; }
-	inline int GetPointsCount() const { return pointsCount; }
+	inline void SetCenter(const Vec2D& center) { mPoints[0] = center; }
+
+	inline int GetPointsCount() const { return mPointsCount; }
+	inline Vec2D GetCenter() const { return mPoints[0]; }
+	inline std::vector<Vec2D> GetPoints() const { return mPoints; }
+	inline int GetSize() const { return mSize; }
+
+	static Star2D RandomSizeStar(const Vec2D& centerPoint, int count) ;
 	
 private:
-	Line2D startLine;
-	int pointsCount;
+	int mSize;
+	int mPointsCount;
+	std::vector<Vec2D> mPoints;
 };
 #endif

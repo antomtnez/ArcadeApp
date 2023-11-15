@@ -2,12 +2,20 @@
 #include "Vec2D.h"
 #include "Line2D.h"
 #include "Star2D.h"
-#include "Square2D.h"
+#include "Triangle.h"
+#include "AARectangle.h"
+#include "Circle.h"
+#include "Utils.h"
+
 #include "ChessBoard.h"
 
 #include <SDL2/SDL.h>
 #include <cassert>
 #include <cmath>
+#include <algorithm>
+
+static const float PI = 3.14159;
+static const float TWO_PI = 2.0f * PI;
 
 Screen::Screen(): mWidth(0), mHeight(0), moptrWindow(nullptr), mnoptrWindowSurface(nullptr) {}
 
@@ -75,6 +83,7 @@ void Screen::Draw(int x, int y, const Color& color)
     assert(moptrWindow);
     if(moptrWindow) mBackBuffer.SetPixel(color, x, y);
 }
+
 void Screen::Draw(const Vec2D& point, const Color& color)
 {
     assert(moptrWindow);
@@ -145,93 +154,139 @@ void Screen::Draw(const Line2D& line, const Color& color)
 
 void Screen::Draw(const Star2D& star, const Color& color)
 {
-    Line2D lineToDraw(star.GetStartLine());
-    float angleBtwLines = 6.28 / star.GetPointsCount();
+    std::vector<Vec2D> points = star.GetPoints();
+    Line2D lineToDraw(points[0], points[0]);
 
-    for(int i=0; i < star.GetPointsCount(); i++)
+    for(int i = 1; i <= star.GetPointsCount(); i++)
     {
+        lineToDraw = { points[0], points[i] };
         Draw(lineToDraw, color);
-        lineToDraw = {lineToDraw.GetP0(), lineToDraw.GetP1().RotationResult(angleBtwLines, lineToDraw.GetP0())};
-        std::cout << star.GetPointsCount() << std::endl;
     }
 }
 
-void Screen::Draw(const Square2D& square, const Color& color)
+void Screen::Draw(const Triangle& triangle, const Color& color, bool fill, const Color& fillColor)
 {
-    Line2D horizontalLine(Vec2D(0, 0), Vec2D(0, 0));
+    if(fill){ FillPoly(triangle.GetPoints(), fillColor); }
 
-    for(int i = -square.GetSide()/2; i <= square.GetSide()/2; i++){
-        horizontalLine = Line2D(Vec2D((square.GetCenter().GetX() - square.GetSide()/2), (square.GetCenter().GetY() + i)), Vec2D((square.GetCenter().GetX() + square.GetSide()/2), (square.GetCenter().GetY() + i)));
-        Draw(horizontalLine, color);
-    }
+    Line2D p0p1 = Line2D(triangle.GetP0(), triangle.GetP1());
+    Line2D p1p2 = Line2D(triangle.GetP1(), triangle.GetP2());
+    Line2D p2p0 = Line2D(triangle.GetP2(), triangle.GetP0());
 
-/*
-    Line2D topSide(Vec2D((square.GetCenter().GetX() - square.GetSide()/2), (square.GetCenter().GetY() + square.GetSide()/2)), Vec2D((square.GetCenter().GetX() + square.GetSide()/2), (square.GetCenter().GetY() + square.GetSide()/2)));
-    Line2D bottomSide(Vec2D((square.GetCenter().GetX() - square.GetSide()/2), (square.GetCenter().GetY() - square.GetSide()/2)), Vec2D((square.GetCenter().GetX() + square.GetSide()/2), (square.GetCenter().GetY() - square.GetSide()/2)));
-    Line2D leftSide(Vec2D((square.GetCenter().GetX() - square.GetSide()/2), (square.GetCenter().GetY() - square.GetSide()/2)), Vec2D((square.GetCenter().GetX() - square.GetSide()/2), (square.GetCenter().GetY() + square.GetSide()/2)));
-    Line2D rightSide(Vec2D((square.GetCenter().GetX() + square.GetSide()/2), (square.GetCenter().GetY() - square.GetSide()/2)), Vec2D((square.GetCenter().GetX() + square.GetSide()/2), (square.GetCenter().GetY() + square.GetSide()/2)));
-
-    Draw(topSide, color);
-    Draw(bottomSide, color);
-    Draw(leftSide, color);
-    Draw(rightSide, color);
-    */
+    Draw(p0p1, color);
+    Draw(p1p2, color);
+    Draw(p2p0, color);
 }
 
-void Screen::DrawChessTable(const ChessBoard& chessboard, const Vec2D& startPoint)
+void Screen::Draw(const AARectangle& rectangle, const Color& color, bool fill, const Color& fillColor)
 {
-    Square2D squareDrawed = Square2D(chessboard.GetSquareSize(), startPoint);
-    for(int x = 1; x <= 8; x++)
+    if(fill) { FillPoly(rectangle.GetPoints(), fillColor); }
+
+    std::vector<Vec2D> points = rectangle.GetPoints();
+
+    Line2D p0p1 = Line2D(points[0], points[1]);
+    Line2D p1p2 = Line2D(points[1], points[2]);
+    Line2D p2p3 = Line2D(points[2], points[3]);
+    Line2D p3p0 = Line2D(points[3], points[0]);
+
+    Draw(p0p1, color);
+    Draw(p1p2, color);
+    Draw(p2p3, color);
+    Draw(p3p0, color);
+}
+
+void Screen::Draw(const Circle& circle, const Color& color, bool fill, const Color& fillColor)
+{
+    static unsigned int NUM_CIRCLE_SEGMENTS = 30;
+
+    std::vector<Vec2D> circlePoints;
+    std::vector<Line2D> lines;
+    
+    float angle = TWO_PI / float(NUM_CIRCLE_SEGMENTS);
+
+    Vec2D p0 = Vec2D(circle.GetCenterPoint().GetX() + circle.GetRadius(), circle.GetCenterPoint().GetY() + circle.GetRadius());
+    Vec2D p1 = p0;
+    Line2D nextLineToDraw;
+
+    for(unsigned int i = 0; i < NUM_CIRCLE_SEGMENTS; i++)
     {
-        for(int y = 1; y <= 8; y++)
-        {
-            squareDrawed = Square2D(chessboard.GetSquareSize(), Vec2D(startPoint.GetX() + (x * chessboard.GetSquareSize()), startPoint.GetY() + (y * chessboard.GetSquareSize())));
-            if(x%2 != 0)
-            {
-                if(y%2 != 0)
-                {
-                    Draw(squareDrawed, Color::White());
-                }
-                else
-                {
-                    Draw(squareDrawed, Color::Black());
-                }
-            }
-            else
-            {
-                if(y%2 != 0)
-                {
-                    Draw(squareDrawed, Color::Black());
-                }
-                else
-                {
-                    Draw(squareDrawed, Color::White());
-                }
-            }
-        }
+        p1.Rotate(angle, circle.GetCenterPoint());
+        nextLineToDraw.SetP1(p1);
+        nextLineToDraw.SetP0(p0);
+
+        lines.push_back(nextLineToDraw);
+        p0 = p1;
+        circlePoints.push_back(p0);
     }
-}
 
-void Screen::Draw(const Square2D& square, const Color& color, const int& angle)
-{
-    Line2D topSide(Vec2D((square.GetCenter().GetX() - square.GetSide()/2), (square.GetCenter().GetY() + square.GetSide()/2)), Vec2D((square.GetCenter().GetX() + square.GetSide()/2), (square.GetCenter().GetY() + square.GetSide()/2)));
-    Line2D bottomSide(Vec2D((square.GetCenter().GetX() - square.GetSide()/2), (square.GetCenter().GetY() - square.GetSide()/2)), Vec2D((square.GetCenter().GetX() + square.GetSide()/2), (square.GetCenter().GetY() - square.GetSide()/2)));
-    Line2D leftSide(Vec2D((square.GetCenter().GetX() - square.GetSide()/2), (square.GetCenter().GetY() - square.GetSide()/2)), Vec2D((square.GetCenter().GetX() - square.GetSide()/2), (square.GetCenter().GetY() + square.GetSide()/2)));
-    Line2D rightSide(Vec2D((square.GetCenter().GetX() + square.GetSide()/2), (square.GetCenter().GetY() - square.GetSide()/2)), Vec2D((square.GetCenter().GetX() + square.GetSide()/2), (square.GetCenter().GetY() + square.GetSide()/2)));
+    if(fill){ FillPoly(circlePoints, fillColor); }
 
-    topSide = { topSide.GetP0().RotationResult(angle, square.GetCenter()), topSide.GetP1().RotationResult(angle, square.GetCenter()) };
-    bottomSide = { bottomSide.GetP0().RotationResult(angle, square.GetCenter()), bottomSide.GetP1().RotationResult(angle, square.GetCenter()) };
-    leftSide = { leftSide.GetP0().RotationResult(angle, square.GetCenter()), leftSide.GetP1().RotationResult(angle, square.GetCenter()) };
-    rightSide = { rightSide.GetP0().RotationResult(angle, square.GetCenter()), rightSide.GetP1().RotationResult(angle, square.GetCenter()) };
-
-    Draw(topSide, color);
-    Draw(bottomSide, color);
-    Draw(leftSide, color);
-    Draw(rightSide, color);
+    for(const Line2D& line : lines) { Draw(line, color); } 
 }
 
 void Screen::ClearScreen()
 {
     assert(moptrWindow);
     if(moptrWindow) SDL_FillRect(mnoptrWindowSurface, nullptr, mClearColor.GetPixelColor());
+}
+
+void Screen::FillPoly(const std::vector<Vec2D>& points, const Color& color)
+{
+    if(points.size() > 0)
+    {
+        float top = points[0].GetY();
+        float bottom = points[0].GetY();
+        float right = points[0].GetX();
+        float left = points[0].GetX();
+
+        for(size_t i = 0; i < points.size(); i++)
+        {
+            if(points[i].GetY() < top){ top = points[i].GetY(); }
+            if(points[i].GetY() > bottom){  bottom = points[i].GetY(); }
+            if(points[i].GetX() < left){ left = points[i].GetX(); }
+            if(points[i].GetX() > right){ right = points[i].GetX(); }
+        }
+
+        for(int pixelY = top; pixelY < bottom; pixelY++)
+        {
+            std::vector<float> nodeXVec;
+
+            size_t j = points.size() - 1;
+
+            for(size_t i = 0; i < points.size(); i++)
+            {
+                float pointiY = points[i].GetY();
+                float pointjY = points[j].GetY();
+
+                if((pointiY <= (float)pixelY && pointjY > (float)pixelY) || (pointjY <= (float)pixelY && pointiY > (float)pixelY))
+                {
+                    float denom = pointjY - pointiY;
+                    if(IsEqual(denom, 0)){ continue; }
+
+                    float x = points[i].GetX() + (pixelY - pointiY)/(denom) * (points[j].GetX() - points[i].GetX());
+                    nodeXVec.push_back(x);
+                }
+                j = i;
+            }
+
+            std::sort(nodeXVec.begin(), nodeXVec.end(), std::less<>());
+
+            for(size_t k = 0; k < nodeXVec.size(); k+=2)
+            {
+                if(nodeXVec[k] > right){ break; }
+
+                if(nodeXVec[k+1] > left)
+                {
+                    if(nodeXVec[k] < left){ nodeXVec[k] = left; }
+                    if(nodeXVec[k+1] > right){ nodeXVec[k+1] = right; }
+
+                    //Line2D line = { Vec2D(nodeXVec[k], pixelY), Vec2D(nodeXVec[k+1], pixelY) };
+                    //Draw(line, color);
+                    for(int pixelX = nodeXVec[k]; pixelX < nodeXVec[k+1]; pixelX++)
+                    {
+                        Draw(pixelX, pixelY, color);
+                    }
+                }
+            }
+        }
+    }
 }
