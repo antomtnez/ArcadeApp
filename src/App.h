@@ -15,10 +15,9 @@ public:
 
     inline uint32_t Width() const { return mScreen.Width(); }
     inline uint32_t Height() const { return mScreen.Height(); }
-
 private:
     Screen mScreen;
-    SDL_Window* mnoptrWindow;
+    SDL_Window * mnoptrWindow;
 };
 
 #endif

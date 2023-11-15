@@ -1,18 +1,5 @@
 #include <iostream>
-#include <SDL2/SDL.h>
-#include <thread>
-#include <chrono>
-#include <random>
-#include <algorithm>
-
-#include "Color.h"
-#include "Screen.h"
-#include "Line2D.h"
-#include "Star2D.h"
-#include "Triangle.h"
-#include "AARectangle.h"
-#include "Circle.h"
-
+#include "App.h"
 
 using namespace std;
 
@@ -22,6 +9,10 @@ const int MAGNIFICATION = 3;
 
 int main(int argv, char** args)
 {
+	if(App::Singleton().Init(SCREEN_WIDTH, SCREEN_HEIGHT, MAGNIFICATION))
+	{
+		App::Singleton().Run();
+	}
 
 	return 0;
 }
